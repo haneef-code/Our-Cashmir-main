@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script>
+        // Clients filter + reorder script (runs after DOM load)
+        document.addEventListener('DOMContentLoaded', function() {
+            const filterBtns = document.querySelectorAll('.filter-btn');
+            const clientsContainer = document.querySelector('.clients');
+            const clients = clientsContainer ? Array.from(clientsContainer.querySelectorAll('.client')) : [];
+
+            function applyFilter(filterValue) {
+                if (!clientsContainer) return;
+                // separate matching and others
+                const matching = [];
+                const others = [];
+                clients.forEach(c => {
+                    const cat = c.getAttribute('data-category') || 'others';
+                    if (filterValue === 'all' || cat === filterValue) matching.push(c);
+                    else others.push(c);
+                });
+
+                // reorder DOM: matching first
+                matching.forEach(c => clientsContainer.appendChild(c));
+                others.forEach(c => clientsContainer.appendChild(c));
+
+                // animate visibility
+                matching.forEach(c => {
+                    c.classList.remove('hidden','fade-out');
+                    c.classList.add('fade-in');
+                });
+                others.forEach(c => {
+                    c.classList.remove('fade-in');
+                    c.classList.add('fade-out');
+                });
+
+                // cleanup fade-in after animation
+                setTimeout(() => matching.forEach(c => c.classList.remove('fade-in')), 500);
+            }
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    filterBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    const filterValue = btn.getAttribute('data-filter');
+                    applyFilter(filterValue);
+                });
+
+                // hover effects
+                btn.addEventListener('mouseover', () => { btn.style.transform = 'translateY(-3px)'; });
+                btn.addEventListener('mouseout', () => { if (!btn.classList.contains('active')) btn.style.transform = 'translateY(0)'; });
+            });
+
+            // initial layout
+            applyFilter('all');
+        });
+    </script>
+    <!-- StyleSheets -->
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="shared.css">
+    <link rel="stylesheet" href="responsive.css">
+    <!-- End StyleSheets -->
+
+    <!-- Scripts -->
+    <script src="script.js" defer></script>
+    <!-- Scripts -->
+    <!-- Favicon  -->
+    <link rel="icon" type="image/x-icon" href="Images/Favicon/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="Images/Favicon/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="32x32" href="Images/Favicon/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="Images/Favicon/favicon-16x16.png">
+    <link rel="manifest" href="Images/Favicon/site.webmanifest">
+    <!-- Favicon  -->
+
+    <style>
+        section.portfolio pre {
+            margin-bottom: 5rem;
+        }
+
+        /* Client Cards Styling */
+        .client {
+            position: relative;
+            transition: all 0.4s ease;
+            padding: 15px;
+            border-radius: 10px;
+            /* removed white background so logos appear without white card */
+            background: transparent;
+            /* keep subtle spacing but remove heavy card shadow */
+            box-shadow: none;
+        }
+
+        .client:hover {
+            transform: translateY(-6px);
+            /* softer hover shadow to keep depth without a white box */
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+        }
+
+        .client img {
+            border-radius: 50%;
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+            /* remove white border around logos */
+            border: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.4s ease;
+            background: transparent;
+        }
+
+        .client:hover img {
+            transform: scale(1.05) rotate(5deg);
+            /* keep border removed on hover */
+        }
+
+        .client p {
+            margin-top: 15px;
+            font-weight: 600;
+            color: #fff; /* brand name text set to white */
+            transition: all 0.3s ease;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+        }
+
+        .client:hover p {
+            color: #fff; /* keep white on hover */
+            transform: scale(1.1);
+        }
+
+        /* Filter Buttons Styling */
+        .clients-filter, .portfolio-filter {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+            padding: 0 1rem;
+        }
+
+        .filter-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            background: #f5f5f5;
+            color: #333;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .filter-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .filter-btn:hover::before {
+            left: 100%;
+        }
+
+        .filter-btn:hover {
+            background: #e0e0e0;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .filter-btn.active {
+            background: #121212;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .clients-filter, .portfolio-filter {
+                gap: 0.5rem;
+            }
+            .filter-btn {
+                padding: 0.6rem 1rem;
+                font-size: 0.8rem;
+            }
+            .client img {
+                width: 120px;
+                height: 120px;
+            }
+        }
+
+        /* Animation for filtering */
+        .client {
+            opacity: 1;
+            transform: scale(1);
+            transition: all 0.5s ease;
+        }
+
+        .client.hidden {
+            opacity: 0;
+            transform: scale(0.8);
+            pointer-events: none;
+        }
+
+        /* Layout for reordering and animations */
+        .clients {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .fade-in {
+            opacity: 1 !important;
+            transform: translateY(0) !important;
+            transition: opacity 0.45s ease, transform 0.45s ease;
+        }
+
+        .fade-out {
+            opacity: 0.12 !important;
+            transform: translateY(18px) !important;
+            transition: opacity 0.45s ease, transform 0.45s ease;
+            pointer-events: none;
+        }
+    </style>
+
+    
+</head>
+
+<body>
+    <!-- ---------------------------------------------------
+Header 
+--------------------------------------------------- -->
+
+    <header>
+        <nav>
+            <div class="logo">
+                <a href="index.html#body">
+                    <img src="Images/Logo/Full Logo.png" alt="" loading="lazy">
+                    <img class="small-logo" src="Images/Logo/Logo Mark.png" alt="" loading="lazy">
+                </a>
+            </div>
+            <div class="links-box">
+                <ul>
+                    <li><a href="index.html#body">Home</a></li>
+                    <li><a href="index.html#clients">Our Clients</a></li>
+                    <li><a href="index.html#services">Services</a></li>
+                    <li><a href="index.html#portfolio">Portfolio</a></li>
+                    <!-- <li><a href="#team">Team</a></li> -->
+                </ul>
+                <div class="toggle-btn">
+                    <i class="fa-solid fa-bars" style="color: #ffffff"></i>
+                </div>
+            </div>
+            <div class="hdr-cta">
+                <a href="index.html#clients">Our Clients</a>
+            </div>
+        </nav>
+
+        <!-- Mobile SideBar -->
+
+        <div class="sidebar-menu">
+            <ul class="links">
+                <li><a href="index.html#body">Home</a></li>
+                <li><a href="index.html#clients">Our Clients</a></li>
+                <li><a href="index.html#services">Services</a></li>
+                <li><a href="index.html#portfolio">Portfolio</a></li>
+                <!-- <li><a href="#team">Team</a></li> -->
+            </ul>
+        </div>
+        <div id="overlay" class="overlay"></div>
+    </header>
+    <main>
+        <!-- ---------------------------------------------------
+Clients Section
+--------------------------------------------------- -->
+        <section class="our-clients" id="clients" style="text-align: center;">
+            <pre data-aos="fade-down" data-aos-duration="1000">Our <span>Clients</span></pre>
+            
+            <!-- Category Filter Section -->
+            <div class="clients-filter" data-aos="fade-up" data-aos-duration="800">
+                <button class="filter-btn active" data-filter="all">All</button>
+                <button class="filter-btn" data-filter="restaurants">Restaurants & Cafes</button>
+                <button class="filter-btn" data-filter="clothing">Clothing Stores</button>
+                <button class="filter-btn" data-filter="schools">Schools</button>
+                <button class="filter-btn" data-filter="services">Services</button>
+                <button class="filter-btn" data-filter="apps">Apps</button>
+                <button class="filter-btn" data-filter="others">Others</button>
+            </div>
+            <div class="clients" data-aos="zoom-in" data-aos-duration="700">
+                <div class="client" data-category="apps">
+                    <a href="https://www.instagram.com/gatoes.official/" target="_blank">
+                        <img src="Images/People/image.png" alt="">
+                    </a>
+                    <p>Gatoes</p>
+                </div>
+                <div class="client" data-category="restaurants">
+                    <a href="https://www.instagram.com/justzingofficial/" target="_blank">
+                        <img src="Images/People/logo-270.png" alt="">
+                    </a>
+                    <p>JustZing</p>
+                </div>
+                <div class="client"data-category="services">
+            <a href="https://www.instagram.com/reel/DJ6pHNfTd3T/" target="_blank">
+                <img src="Images/People/ink spot.jpg" alt="">
+            </a>
+            <p>Ink Spot</p>
+        </div>
+                <div class="client" data-category="restaurants">
+                    <a href="https://www.instagram.com/khushwara_kahave/" target="_blank">
+                        <img src="Images/People/ww.jpg" alt="">
+                    </a>
+                    <p>Khushwara Kahave</p>
+                </div>
+                <div class="client" data-category="restaurants">
+                    <a href="https://www.instagram.com/__im1995__/" target="_blank">
+                        <img src="Images/People/Ab.png" alt="">
+                    </a>
+                    <p>IM95 Perfumes</p>
+                </div>
+                <div class="client" data-category="restaurants">
+                    <a href="https://www.instagram.com/vintagehousekupwara/" target="_blank">
+                        <img src="Images/People/vishal.png" alt="">
+                    </a>
+                    <p>Vintage House</p>
+                </div>
+                <div class="client" data-category="services">
+                    <a href="https://www.instagram.com/webinvolve/" target="_blank">
+                        <img src="Images/People/Web involve.jpeg" alt="">
+                    </a>
+                    <p>Web Involve</p>
+                </div>
+                <div class="client" data-category="services">
+                    <a href="https://www.instagram.com/p/DKhTsMJTin-/" target="_blank">
+                        <img src="Images/People/QHH.png" alt="">
+                    </a>
+                    <p>Quality Healthcare <br>Hospital</p>
+                </div>
+                <div class="client" data-category="restaurants">
+                    <a href="https://www.instagram.com/p/DLt6msTR-gc/" target="_blank">
+                        <img src="Images/People/Lovely sweets.jpg" alt="">
+                    </a>
+                    <p>Lovely Sweets</p>
+                </div>
+                <div class="client">
+                    <a href="https://www.instagram.com/p/DL7Z0RVoJam/" target="_blank">
+                        <img src="Images/People/Power House.png" alt="">
+                    </a>
+                    <p>Power House</p>
+                </div>
+                <div class="client">
+                    <a href="https://www.instagram.com/reel/DMF6AAQyL3h/" target="_blank">
+                        <img src="Images/People/Circus.jpg" alt="">
+                    </a>
+                    <p>Circus</p>
+                </div>
+                <div class="client" data-category="schools">
+                    <a href="https://www.instagram.com/p/DLt35-PzcE_/" target="_blank">
+                        <img src="Images/People/BSK.jpg" alt="">
+                    </a>
+                    <p>Bachpan School</p>
+                </div>
+                <div class="client">
+                    <a href="https://www.instagram.com/reel/DOYfb9vCel2/" target="_blank">
+                        <img src="Images/People/deconcepts.jpg" alt="">
+                    </a>
+                    <p>DeConcepts SGR</p>
+                </div>
+                <div class="client">
+                    <a href="https://www.instagram.com/p/DMXufP-PqMG/" target="_blank">
+                        <img src="Images/People/PB.jpg" alt="">
+                    </a>
+                    <p>Print Box</p>
+                </div>
+
+                <!-- New Additional Clients -->
+                <div class="client" data-category="apps">
+                    <a href="https://www.instagram.com/dream_cabs?igsh=MWphemV4MzY0dDB4aQ==" target="_blank">
+                        <img src="https://i.pinimg.com/736x/bf/99/d2/bf99d2ff79acd9a91a87b60f5a186f5d.jpg" alt="Dream Cabs">
+                    </a>
+                    <p>Dream Cabs</p>
+                </div>
+
+                <div class="client" data-category="schools">
+                    <a href="https://www.instagram.com/sharkiesplayschool?igsh=MTdzNWRqaWlxbGp0eA==" target="_blank">
+                        <img src="https://i.pinimg.com/736x/7a/e7/cc/7ae7cc3072b6cad49b59718a97ce9a70.jpg" alt="Sharkies">
+                    </a>
+                    <p>Sharkies</p>
+                </div>
+
+                <div class="client" data-category="clothing">
+                    <a href="https://www.instagram.com/panposh.official?igsh=M2wwaHp4a3c3ZzI1" target="_blank">
+                        <img src="https://i.pinimg.com/736x/55/65/42/55654261d80b52397f37bed7e3d3f33d.jpg" alt="Panposh">
+                    </a>
+                    <p>Panposh</p>
+                </div>
+
+                <div class="client">
+                    <a href="https://www.facebook.com/share/v/1SHVWReuJk/?mibextid=wwXIfr" target="_blank">
+                        <img src="https://i.pinimg.com/736x/e1/14/36/e11436e94dd64354fff892b36b09c6f5.jpg" alt="Peak Fitness">
+                    </a>
+                    <p>Studybox</p>
+                </div>
+
+                <div class="client">
+                    <a href="https://www.instagram.com/makhmal_designer_outfit_?igsh=MTdzdDIwZnNuYzQ5" target="_blank">
+                        <img src="https://i.pinimg.com/736x/a9/7c/4c/a97c4c234991ef91786bc5825c04a0e9.jpg" alt="Green Valley">
+                    </a>
+                    <p>Makhmal</p>
+                </div>
+
+<!--
+                <div class="client">
+                    <a href="#" target="_blank">
+                        <img src="https://randomuser.me/api/portraits/men/6.jpg" alt="Style Hub">
+                    </a>
+                    <p>Style Hub</p>
+                </div>
+
+                <div class="client">
+                    <a href="#" target="_blank">
+                        <img src="https://randomuser.me/api/portraits/women/7.jpg" alt="Fresh Bite">
+                    </a>
+                    <p>Fresh Bite</p>
+                </div>
+-->
+
+            </div>
+        </section>
+
+            <!-- ---------------------------------------------------
+Book a Call Section 
+--------------------------------------------------- -->
+            <!-- ---------------------------------------------------
+Book a Call Section 
+--------------------------------------------------- -->
+        <section class="book-a-call" id="book-a-call">
+            <div class="container">
+                <div class="icon"><img src="Images/Icons/Book a Call Icon.png" alt=""></div>
+                <h2>Book a Call</h2>
+                <p>Let's Have a Discussion and know your Requirements!</p>
+
+                <a href="https://wa.me/917889676481" target="_blank" class="cta filled-cta">Book a
+                    Call</a>
+                <a href="mailto:teamourcashmir@gmail.com" target="_blank" class="cta">Get in Touch</a>
+            </div>
+        </section>
+
+    </main>
+    <footer>
+        <!-- <div class="icons">
+        <a href="https://www.instagram.com/elevavemedia/" target="_blank"><img src="Images/Icons/insta.png"
+                class="insta-footer" alt=""></a>
+        <a href="mailto:hafiz@elevavemedia.com" target="_blank"><img src="Images/Icons/email.png" alt=""></a>
+        <a href="https://calendly.com/hafizhaneef26/30min" target="_blank"><img
+                src="Images/Icons/meet.png" alt=""></a>
+        <a href="https://www.linkedin.com/company/elevave-media/" target="_blank"><img src="Images/Icons/linked.png"
+                alt=""></a>
+    </div>
+    <hr> -->
+        <p>Copyright @ 2025 hanexa. All right reserved</p>
+        <div style="text-decoration: underline !important; text-align: center; margin-top: 1rem;">
+            <a href="tac.html" style="margin: 0 1rem;">Terms And Conditions</a>
+            <a href="pp.html" style="margin: 0 1rem;">Privacy Policy</a> <br>
+            <a href="sp.html" style="margin: 0 1rem;">Shipping Policy</a>
+            <a href="car.html" style="margin: 0 1rem;">Cancellation and Refunds</a>
+            <a href="contact.html" style="margin: 0 1rem;">Contact Us</a>
+        </div>
+    </footer>
+
+
+</body>
+
+</html>
